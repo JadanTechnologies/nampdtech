@@ -1,5 +1,5 @@
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types';
 import { 
@@ -15,13 +15,15 @@ import {
   X
 } from 'lucide-react';
 
-interface LayoutProps extends RouteComponentProps {
+interface LayoutProps {
   children: React.ReactNode;
 }
 
-const LayoutComponent: React.FC<LayoutProps> = ({ children, history, location }) => {
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const history = useHistory();
+  const location = useLocation();
 
   if (!user) return <>{children}</>;
 
@@ -65,44 +67,46 @@ const LayoutComponent: React.FC<LayoutProps> = ({ children, history, location })
                 <NavItem to="/profile" icon={UserCheck} label="My Profile" />
                 <NavItem to="/payments" icon={CreditCard} label="Payments" />
                 <NavItem to="/digital-id" icon={ShieldCheck} label="Digital ID" />
+                {/* Only show certificate if Active */}
                 <NavItem to="/certificate" icon={Award} label="Certificate" />
               </>
             )}
 
             {/* Admin Links */}
-            {[UserRole.SUPER_ADMIN, UserRole.STATE_ADMIN, UserRole.CHAIRMAN].includes(user.role) && (
+            {(user.role === UserRole.SUPER_ADMIN || user.role === UserRole.STATE_ADMIN || user.role === UserRole.CHAIRMAN) && (
               <>
-                <NavItem to="/members" icon={Users} label="Directory" />
                 <NavItem to="/approvals" icon={FileCheck} label="Approvals" />
-                <NavItem to="/payments" icon={CreditCard} label="Financials" />
+                <NavItem to="/members" icon={Users} label="Members" />
+                <NavItem to="/payments" icon={CreditCard} label="Finance" />
               </>
             )}
           </nav>
         </div>
-        <div className="flex-shrink-0 flex bg-gray-800 p-4 border-t border-gray-700">
-          <div className="flex items-center w-full">
-            <div className="ml-3 w-full">
-              <p className="text-sm font-medium text-white truncate">{user.fullName}</p>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{user.role.replace('_', ' ')}</p>
-              <button 
-                onClick={() => { logout(); history.push('/login'); }}
-                className="mt-3 flex items-center text-xs text-red-400 hover:text-red-300 w-full transition-colors duration-150"
-              >
-                <LogOut className="w-3 h-3 mr-1" /> Sign out
-              </button>
+        <div className="flex-shrink-0 flex bg-gray-800 p-4">
+          <div 
+            onClick={logout}
+            className="flex-shrink-0 w-full group block cursor-pointer"
+          >
+            <div className="flex items-center">
+              <div>
+                <LogOut className="inline-block h-9 w-9 rounded-full text-gray-400 p-1 bg-gray-900" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-white">Sign Out</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden pt-16 md:pt-0">
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-8">
-          {children}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+          <div className="container mx-auto px-6 py-8">
+            {children}
+          </div>
         </main>
       </div>
     </div>
   );
 };
-
-export const Layout = withRouter(LayoutComponent);

@@ -14,22 +14,12 @@ import { DigitalID } from './pages/DigitalID';
 import { Profile } from './pages/Profile';
 
 // Protected Route Wrapper for v5
-const PrivateRoute = ({ component: Component, ...rest }: any) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
-  return (
-    <Route
-      {...rest}
-      render={(props) =>
-        isAuthenticated ? (
-          <Layout>
-            <Component {...props} />
-          </Layout>
-        ) : (
-          <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
-        )
-      }
-    />
-  );
+  if (!isAuthenticated) {
+    return <Redirect to="/login" />;
+  }
+  return <Layout>{children}</Layout>;
 };
 
 const App: React.FC = () => {
@@ -42,18 +32,34 @@ const App: React.FC = () => {
             <Route path="/register" component={Register} />
             
             {/* Protected Routes */}
-            <PrivateRoute path="/approvals" component={Approvals} />
-            <PrivateRoute path="/payments" component={Payments} />
-            <PrivateRoute path="/members" component={Members} />
-            <PrivateRoute path="/certificate" component={Certificate} />
-            <PrivateRoute path="/digital-id" component={DigitalID} />
-            <PrivateRoute path="/profile" component={Profile} />
+            <Route path="/approvals">
+              <ProtectedRoute><Approvals /></ProtectedRoute>
+            </Route>
+            <Route path="/payments">
+              <ProtectedRoute><Payments /></ProtectedRoute>
+            </Route>
+            <Route path="/members">
+              <ProtectedRoute><Members /></ProtectedRoute>
+            </Route>
+            <Route path="/certificate">
+              <ProtectedRoute><Certificate /></ProtectedRoute>
+            </Route>
+            <Route path="/digital-id">
+              <ProtectedRoute><DigitalID /></ProtectedRoute>
+            </Route>
+            <Route path="/profile">
+              <ProtectedRoute><Profile /></ProtectedRoute>
+            </Route>
             
-            {/* Dashboard - needs exact to not match others if placed above, but in switch order matters */}
-            <PrivateRoute path="/" exact component={Dashboard} />
+            {/* Dashboard */}
+            <Route exact path="/">
+              <ProtectedRoute><Dashboard /></ProtectedRoute>
+            </Route>
             
             {/* Fallback */}
-            <Redirect to="/" />
+            <Route path="*">
+              <Redirect to="/" />
+            </Route>
           </Switch>
         </Router>
       </DataProvider>
