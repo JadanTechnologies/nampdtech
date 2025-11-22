@@ -28,12 +28,8 @@ const App: React.FC = () => {
       <DataProvider>
         <Router>
           <Switch>
-            <Route path="/login">
-              <Login />
-            </Route>
-            <Route path="/register">
-              <Register />
-            </Route>
+            <Route path="/login" component={Login} />
+            <Route path="/register" component={Register} />
             
             {/* Protected Routes */}
             <Route path="/approvals">
@@ -55,7 +51,7 @@ const App: React.FC = () => {
               <ProtectedRoute><Profile /></ProtectedRoute>
             </Route>
             
-            {/* Dashboard - Must be exact to avoid catching sub-routes */}
+            {/* Dashboard */}
             <Route exact path="/">
               <ProtectedRoute><Dashboard /></ProtectedRoute>
             </Route>

@@ -37,7 +37,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       }}
       className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md cursor-pointer ${isActive(to)}`}
     >
-      <Icon className="mr-3 h-6 w-6 flex-shrink-0" />
+      <Icon className="mr-3 h-6 w-6 flex-shrink0" />
       {label}
     </div>
   );
