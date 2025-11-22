@@ -5,12 +5,11 @@ import { UserRole, MembershipStatus } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, CreditCard, Clock, CheckCircle } from 'lucide-react';
 import { StatusBadge } from '../components/StatusBadge';
-import { useHistory } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-export const Dashboard: React.FC = () => {
+const DashboardComponent: React.FC<RouteComponentProps> = ({ history }) => {
   const { user } = useAuth();
   const { getStats, members } = useData();
-  const history = useHistory();
   const stats = getStats();
 
   // Member View
@@ -150,3 +149,5 @@ export const Dashboard: React.FC = () => {
     </div>
   );
 };
+
+export const Dashboard = withRouter(DashboardComponent);

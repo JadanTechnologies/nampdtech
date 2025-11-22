@@ -1,5 +1,5 @@
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types';
 import { 
@@ -15,10 +15,12 @@ import {
   X
 } from 'lucide-react';
 
-export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface LayoutProps extends RouteComponentProps {
+  children: React.ReactNode;
+}
+
+const LayoutComponent: React.FC<LayoutProps> = ({ children, history, location }) => {
   const { user, logout } = useAuth();
-  const history = useHistory();
-  const location = useLocation();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   if (!user) return <>{children}</>;
@@ -102,3 +104,5 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     </div>
   );
 };
+
+export const Layout = withRouter(LayoutComponent);

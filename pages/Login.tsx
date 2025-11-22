@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Lock, Mail } from 'lucide-react';
 
-export const Login: React.FC = () => {
+const LoginComponent: React.FC<RouteComponentProps> = ({ history }) => {
   const [email, setEmail] = useState('member@gmail.com');
   const { login } = useAuth();
-  const history = useHistory();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,3 +91,5 @@ export const Login: React.FC = () => {
     </div>
   );
 };
+
+export const Login = withRouter(LoginComponent);

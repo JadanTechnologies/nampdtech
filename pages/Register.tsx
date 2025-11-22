@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { MOCK_STATES } from '../services/mockData';
 import { Upload } from 'lucide-react';
 
-export const Register: React.FC = () => {
+const RegisterComponent: React.FC<RouteComponentProps> = ({ history }) => {
   const { register } = useAuth();
-  const history = useHistory();
   const [step, setStep] = useState(1);
   
   const [formData, setFormData] = useState({
@@ -118,3 +117,5 @@ export const Register: React.FC = () => {
     </div>
   );
 };
+
+export const Register = withRouter(RegisterComponent);
