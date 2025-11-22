@@ -44,7 +44,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...data,
       id: `u${Date.now()}`,
       role: 'MEMBER', // Default registration role
-      documents: { ninUrl: '', passportUrl: 'https://picsum.photos/200', businessUrl: '' },
+      // Use provided documents or fallback defaults
+      documents: data.documents || { ninUrl: '', passportUrl: 'https://picsum.photos/200', businessUrl: '' },
       status: 'PENDING_CHAIRMAN' // Workflow start
     } as MemberProfile;
     
