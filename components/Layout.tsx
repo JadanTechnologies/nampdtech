@@ -20,6 +20,24 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+interface NavItemProps {
+  to: string;
+  icon: any;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+const NavItem: React.FC<NavItemProps> = ({ to, icon: Icon, label, isActive, onClick }) => (
+  <div 
+    onClick={onClick}
+    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md cursor-pointer ${isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
+  >
+    <Icon className="mr-3 h-6 w-6 flex-shrink-0" />
+    {label}
+  </div>
+);
+
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -28,20 +46,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   if (!user) return <>{children}</>;
 
-  const isActive = (path: string) => location.pathname === path ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white';
+  const isPathActive = (path: string) => location.pathname === path;
 
-  const NavItem = ({ to, icon: Icon, label }: any) => (
-    <div 
-      onClick={() => {
-        navigate(to);
-        setMobileOpen(false);
-      }}
-      className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md cursor-pointer ${isActive(to)}`}
-    >
-      <Icon className="mr-3 h-6 w-6 flex-shrink0" />
-      {label}
-    </div>
-  );
+  const handleNavClick = (path: string) => {
+    navigate(path);
+    setMobileOpen(false);
+  };
 
   return (
     <div className="min-h-screen flex bg-gray-100">
@@ -60,25 +70,31 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
         <div className="flex-1 flex flex-col overflow-y-auto">
           <nav className="flex-1 px-2 space-y-1">
-            <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
+            <NavItem 
+              to="/" 
+              icon={LayoutDashboard} 
+              label="Dashboard" 
+              isActive={isPathActive('/')} 
+              onClick={() => handleNavClick('/')} 
+            />
             
             {/* Member Links */}
             {user.role === UserRole.MEMBER && (
               <>
-                <NavItem to="/profile" icon={UserCheck} label="My Profile" />
-                <NavItem to="/payments" icon={CreditCard} label="Payments" />
-                <NavItem to="/digital-id" icon={ShieldCheck} label="Digital ID" />
+                <NavItem to="/profile" icon={UserCheck} label="My Profile" isActive={isPathActive('/profile')} onClick={() => handleNavClick('/profile')} />
+                <NavItem to="/payments" icon={CreditCard} label="Payments" isActive={isPathActive('/payments')} onClick={() => handleNavClick('/payments')} />
+                <NavItem to="/digital-id" icon={ShieldCheck} label="Digital ID" isActive={isPathActive('/digital-id')} onClick={() => handleNavClick('/digital-id')} />
                 {/* Only show certificate if Active */}
-                <NavItem to="/certificate" icon={Award} label="Certificate" />
+                <NavItem to="/certificate" icon={Award} label="Certificate" isActive={isPathActive('/certificate')} onClick={() => handleNavClick('/certificate')} />
               </>
             )}
 
             {/* Admin Links */}
             {(user.role === UserRole.SUPER_ADMIN || user.role === UserRole.STATE_ADMIN || user.role === UserRole.CHAIRMAN) && (
               <>
-                <NavItem to="/approvals" icon={FileCheck} label="Approvals" />
-                <NavItem to="/members" icon={Users} label="Members" />
-                <NavItem to="/payments" icon={CreditCard} label="Finance" />
+                <NavItem to="/approvals" icon={FileCheck} label="Approvals" isActive={isPathActive('/approvals')} onClick={() => handleNavClick('/approvals')} />
+                <NavItem to="/members" icon={Users} label="Members" isActive={isPathActive('/members')} onClick={() => handleNavClick('/members')} />
+                <NavItem to="/payments" icon={CreditCard} label="Finance" isActive={isPathActive('/payments')} onClick={() => handleNavClick('/payments')} />
               </>
             )}
           </nav>
