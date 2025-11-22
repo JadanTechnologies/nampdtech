@@ -3,6 +3,66 @@ import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { Save, User, Image as ImageIcon, X, Upload, Trash2 } from 'lucide-react';
 
+interface DocumentCardProps {
+  title: string;
+  url: string;
+  type: 'passport' | 'nin' | 'business';
+  isEditing: boolean;
+  onUpload: (e: React.ChangeEvent<HTMLInputElement>, type: 'passport' | 'nin' | 'business') => void;
+  onRemove: (type: 'passport' | 'nin' | 'business') => void;
+}
+
+const DocumentCard: React.FC<DocumentCardProps> = ({ title, url, type, isEditing, onUpload, onRemove }) => (
+  <div className="border border-gray-200 rounded-lg p-3 flex flex-col items-center justify-center bg-gray-50 relative">
+      <span className="text-xs font-medium text-gray-500 mb-2">{title}</span>
+      {url ? (
+          <div className="relative w-full aspect-video bg-gray-200 rounded overflow-hidden group">
+              <img src={url} alt={title} className="w-full h-full object-cover" />
+              {isEditing && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                     <div className="flex space-x-2">
+                        <label className="cursor-pointer text-white text-xs flex flex-col items-center hover:text-indigo-200">
+                            <Upload size={20} />
+                            <span className="mt-1">Change</span>
+                            <input type="file" className="hidden" accept="image/*" onChange={(e) => onUpload(e, type)} />
+                        </label>
+                        <button 
+                            type="button" 
+                            onClick={() => onRemove(type)}
+                            className="text-white text-xs flex flex-col items-center hover:text-red-300"
+                        >
+                            <Trash2 size={20} />
+                            <span className="mt-1">Remove</span>
+                        </button>
+                     </div>
+                </div>
+              )}
+              {isEditing && (
+                  <button 
+                      type="button" 
+                      onClick={() => onRemove(type)}
+                      className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full shadow-md sm:hidden"
+                  >
+                      <X size={12} />
+                  </button>
+              )}
+          </div>
+      ) : (
+          <div className="w-full aspect-video bg-gray-200 rounded flex items-center justify-center border-2 border-dashed border-gray-300">
+               {isEditing ? (
+                   <label className="cursor-pointer flex flex-col items-center text-gray-500 hover:text-indigo-600 w-full h-full justify-center">
+                       <Upload size={24} />
+                       <span className="text-xs mt-1">Upload</span>
+                       <input type="file" className="hidden" accept="image/*" onChange={(e) => onUpload(e, type)} />
+                   </label>
+               ) : (
+                   <span className="text-xs text-gray-400">No Document</span>
+               )}
+          </div>
+      )}
+  </div>
+);
+
 export const Profile: React.FC = () => {
   const { user } = useAuth();
   const { updateProfile } = useData();
@@ -56,57 +116,6 @@ export const Profile: React.FC = () => {
     });
     setIsEditing(false);
   };
-
-  const DocumentCard = ({ title, url, type }: { title: string, url: string, type: 'passport' | 'nin' | 'business' }) => (
-      <div className="border border-gray-200 rounded-lg p-3 flex flex-col items-center justify-center bg-gray-50 relative">
-          <span className="text-xs font-medium text-gray-500 mb-2">{title}</span>
-          {url ? (
-              <div className="relative w-full aspect-video bg-gray-200 rounded overflow-hidden group">
-                  <img src={url} alt={title} className="w-full h-full object-cover" />
-                  {isEditing && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                         <div className="flex space-x-2">
-                            <label className="cursor-pointer text-white text-xs flex flex-col items-center hover:text-indigo-200">
-                                <Upload size={20} />
-                                <span className="mt-1">Change</span>
-                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, type)} />
-                            </label>
-                            <button 
-                                type="button" 
-                                onClick={() => handleRemoveDocument(type)}
-                                className="text-white text-xs flex flex-col items-center hover:text-red-300"
-                            >
-                                <Trash2 size={20} />
-                                <span className="mt-1">Remove</span>
-                            </button>
-                         </div>
-                    </div>
-                  )}
-                  {isEditing && (
-                      <button 
-                          type="button" 
-                          onClick={() => handleRemoveDocument(type)}
-                          className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full shadow-md sm:hidden"
-                      >
-                          <X size={12} />
-                      </button>
-                  )}
-              </div>
-          ) : (
-              <div className="w-full aspect-video bg-gray-200 rounded flex items-center justify-center border-2 border-dashed border-gray-300">
-                   {isEditing ? (
-                       <label className="cursor-pointer flex flex-col items-center text-gray-500 hover:text-indigo-600 w-full h-full justify-center">
-                           <Upload size={24} />
-                           <span className="text-xs mt-1">Upload</span>
-                           <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, type)} />
-                       </label>
-                   ) : (
-                       <span className="text-xs text-gray-400">No Document</span>
-                   )}
-              </div>
-          )}
-      </div>
-  );
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-10">
@@ -189,8 +198,22 @@ export const Profile: React.FC = () => {
                <div className="border-t border-gray-100 pt-6">
                   <h4 className="text-sm font-medium text-gray-900 mb-4">Uploaded Documents</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <DocumentCard title="NIN Slip" url={documents.ninUrl} type="nin" />
-                      <DocumentCard title="Business Doc" url={documents.businessUrl} type="business" />
+                      <DocumentCard 
+                        title="NIN Slip" 
+                        url={documents.ninUrl} 
+                        type="nin" 
+                        isEditing={isEditing} 
+                        onUpload={handleFileUpload} 
+                        onRemove={handleRemoveDocument} 
+                      />
+                      <DocumentCard 
+                        title="Business Doc" 
+                        url={documents.businessUrl} 
+                        type="business" 
+                        isEditing={isEditing} 
+                        onUpload={handleFileUpload} 
+                        onRemove={handleRemoveDocument} 
+                      />
                   </div>
                </div>
 
