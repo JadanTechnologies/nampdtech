@@ -1,18 +1,18 @@
 
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Lock, Mail } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('member@gmail.com');
   const { login } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     login(email, ''); // Role handled by mock lookup
-    history.push('/');
+    navigate('/');
   };
 
   return (
@@ -73,7 +73,7 @@ export const Login: React.FC = () => {
               <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">Or register</span></div>
             </div>
             <div className="mt-6 grid grid-cols-1">
-              <button onClick={() => history.push('/register')} className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              <button onClick={() => navigate('/register')} className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                 Create new account
               </button>
             </div>

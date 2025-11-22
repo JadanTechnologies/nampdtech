@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types';
 import { 
@@ -23,7 +23,7 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
   if (!user) return <>{children}</>;
@@ -33,7 +33,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const NavItem = ({ to, icon: Icon, label }: any) => (
     <div 
       onClick={() => {
-        history.push(to);
+        navigate(to);
         setMobileOpen(false);
       }}
       className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md cursor-pointer ${isActive(to)}`}

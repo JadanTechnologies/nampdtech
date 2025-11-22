@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import { Layout } from './components/Layout';
@@ -14,11 +14,11 @@ import { Certificate } from './pages/Certificate';
 import { DigitalID } from './pages/DigitalID';
 import { Profile } from './pages/Profile';
 
-// Protected Route Wrapper for v5
+// Protected Route Wrapper for v6
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
   if (!isAuthenticated) {
-    return <Redirect to="/login" />;
+    return <Navigate to="/login" replace />;
   }
   return <Layout>{children}</Layout>;
 };
@@ -28,44 +28,24 @@ const App: React.FC = () => {
     <AuthProvider>
       <DataProvider>
         <Router>
-          <Switch>
-            <Route path="/login">
-              <Login />
-            </Route>
-            <Route path="/register">
-              <Register />
-            </Route>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             
             {/* Protected Routes */}
-            <Route path="/approvals">
-              <ProtectedRoute><Approvals /></ProtectedRoute>
-            </Route>
-            <Route path="/payments">
-              <ProtectedRoute><Payments /></ProtectedRoute>
-            </Route>
-            <Route path="/members">
-              <ProtectedRoute><Members /></ProtectedRoute>
-            </Route>
-            <Route path="/certificate">
-              <ProtectedRoute><Certificate /></ProtectedRoute>
-            </Route>
-            <Route path="/digital-id">
-              <ProtectedRoute><DigitalID /></ProtectedRoute>
-            </Route>
-            <Route path="/profile">
-              <ProtectedRoute><Profile /></ProtectedRoute>
-            </Route>
+            <Route path="/approvals" element={<ProtectedRoute><Approvals /></ProtectedRoute>} />
+            <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+            <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
+            <Route path="/certificate" element={<ProtectedRoute><Certificate /></ProtectedRoute>} />
+            <Route path="/digital-id" element={<ProtectedRoute><DigitalID /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             
             {/* Dashboard */}
-            <Route exact path="/">
-              <ProtectedRoute><Dashboard /></ProtectedRoute>
-            </Route>
+            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             
             {/* Fallback */}
-            <Route path="*">
-              <Redirect to="/" />
-            </Route>
-          </Switch>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </Router>
       </DataProvider>
     </AuthProvider>
