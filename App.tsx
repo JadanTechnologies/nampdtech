@@ -25,22 +25,42 @@ const App: React.FC = () => {
       <DataProvider>
         <Router>
           <Switch>
-            <Route path="/login"><Login /></Route>
-            <Route path="/register"><Register /></Route>
+            <Route path="/login">
+              <Login />
+            </Route>
+            <Route path="/register">
+              <Register />
+            </Route>
             
             {/* Protected Routes */}
-            <Route path="/approvals"><PrivateRoute><Layout><Approvals /></Layout></PrivateRoute></Route>
-            <Route path="/payments"><PrivateRoute><Layout><Payments /></Layout></PrivateRoute></Route>
-            <Route path="/members"><PrivateRoute><Layout><Members /></Layout></PrivateRoute></Route>
-            <Route path="/certificate"><PrivateRoute><Layout><Certificate /></Layout></PrivateRoute></Route>
-            <Route path="/digital-id"><PrivateRoute><Layout><DigitalID /></Layout></PrivateRoute></Route>
-            <Route path="/profile"><PrivateRoute><Layout><Profile /></Layout></PrivateRoute></Route>
+            <Route path="/approvals">
+              <PrivateRoute><Layout><Approvals /></Layout></PrivateRoute>
+            </Route>
+            <Route path="/payments">
+              <PrivateRoute><Layout><Payments /></Layout></PrivateRoute>
+            </Route>
+            <Route path="/members">
+              <PrivateRoute><Layout><Members /></Layout></PrivateRoute>
+            </Route>
+            <Route path="/certificate">
+              <PrivateRoute><Layout><Certificate /></Layout></PrivateRoute>
+            </Route>
+            <Route path="/digital-id">
+              <PrivateRoute><Layout><DigitalID /></Layout></PrivateRoute>
+            </Route>
+            <Route path="/profile">
+              <PrivateRoute><Layout><Profile /></Layout></PrivateRoute>
+            </Route>
             
-            {/* Dashboard must be exact or last to avoid catching everything */}
-            <Route path="/" exact><PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute></Route>
+            {/* Dashboard */}
+            <Route exact path="/">
+              <PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>
+            </Route>
             
             {/* Fallback */}
-            <Route path="*"><Redirect to="/" /></Route>
+            <Route path="*">
+              <Redirect to="/" />
+            </Route>
           </Switch>
         </Router>
       </DataProvider>
