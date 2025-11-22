@@ -12,6 +12,13 @@ export const Register: React.FC = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
   
+  // Track upload status for each document type
+  const [uploadingDocs, setUploadingDocs] = useState({
+    nin: false,
+    passport: false,
+    business: false
+  });
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -48,7 +55,13 @@ export const Register: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Set loading state for this specific document
+    setUploadingDocs(prev => ({ ...prev, [type]: true }));
+
     try {
+      // Simulate a small network delay for better UX visual feedback
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       const base64 = await convertToBase64(file);
       if (type === 'passport') setDocuments(prev => ({ ...prev, passportUrl: base64 }));
       if (type === 'business') setDocuments(prev => ({ ...prev, businessUrl: base64 }));
@@ -59,6 +72,9 @@ export const Register: React.FC = () => {
       }
     } catch (err) {
       console.error("File reading error", err);
+    } finally {
+      // Clear loading state
+      setUploadingDocs(prev => ({ ...prev, [type]: false }));
     }
   };
 
@@ -173,20 +189,22 @@ export const Register: React.FC = () => {
                           <div className="flex items-start justify-between mb-3">
                               <div className="flex items-center">
                                 <div className="flex-shrink-0">
-                                    {isScanning ? <Loader className="h-6 w-6 text-indigo-600 animate-spin" /> : <ScanLine className="h-6 w-6 text-indigo-600" />}
+                                    {(isScanning || uploadingDocs.nin) ? <Loader className="h-6 w-6 text-indigo-600 animate-spin" /> : <ScanLine className="h-6 w-6 text-indigo-600" />}
                                 </div>
                                 <div className="ml-3">
                                     <h3 className="text-sm font-medium text-indigo-800">NIN Slip</h3>
                                     {scanError ? (
                                         <p className="text-xs text-red-600 flex items-center mt-1"><AlertCircle className="w-3 h-3 mr-1"/> {scanError}</p>
                                     ) : (
-                                        <p className="text-xs text-indigo-600 mt-1">Upload for Auto-fill</p>
+                                        <p className="text-xs text-indigo-600 mt-1">
+                                            {uploadingDocs.nin ? "Uploading..." : isScanning ? "Extracting Data..." : "Upload for Auto-fill"}
+                                        </p>
                                     )}
                                 </div>
                               </div>
                           </div>
                           
-                          {documents.ninUrl ? (
+                          {documents.ninUrl && !uploadingDocs.nin ? (
                              <div className="relative w-full h-32 bg-gray-200 rounded-lg overflow-hidden border border-gray-300 group">
                                 <img src={documents.ninUrl} alt="NIN Preview" className="h-full w-full object-cover" />
                                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity flex items-center justify-center">
@@ -202,10 +220,19 @@ export const Register: React.FC = () => {
                              </div>
                           ) : (
                              <div className="mt-2">
-                                <label className="w-full flex justify-center items-center px-4 py-4 border-2 border-dashed border-indigo-300 rounded-lg text-sm font-medium text-indigo-600 bg-white hover:bg-indigo-50 cursor-pointer transition-colors">
-                                    <Upload className="h-5 w-5 mr-2" />
-                                    {isScanning ? "Analyzing..." : "Click to Upload NIN"}
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'nin')} disabled={isScanning} />
+                                <label className={`w-full flex justify-center items-center px-4 py-4 border-2 border-dashed border-indigo-300 rounded-lg text-sm font-medium text-indigo-600 bg-white hover:bg-indigo-50 cursor-pointer transition-colors ${uploadingDocs.nin || isScanning ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                    {uploadingDocs.nin || isScanning ? (
+                                        <>
+                                            <Loader className="h-5 w-5 mr-2 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload className="h-5 w-5 mr-2" />
+                                            Click to Upload NIN
+                                        </>
+                                    )}
+                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'nin')} disabled={isScanning || uploadingDocs.nin} />
                                 </label>
                              </div>
                           )}
@@ -215,7 +242,7 @@ export const Register: React.FC = () => {
                             {/* Passport Photo */}
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Passport Photo</label>
-                                {documents.passportUrl ? (
+                                {documents.passportUrl && !uploadingDocs.passport ? (
                                     <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
                                         <img src={documents.passportUrl} alt="Passport" className="h-full w-full object-cover" />
                                         <button 
@@ -227,10 +254,14 @@ export const Register: React.FC = () => {
                                         </button>
                                     </div>
                                 ) : (
-                                    <label className="flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors">
-                                        <ImageIcon className="h-6 w-6 mb-1" />
-                                        <span className="text-xs">Upload</span>
-                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'passport')} />
+                                    <label className={`flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors ${uploadingDocs.passport ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                        {uploadingDocs.passport ? (
+                                            <Loader className="h-6 w-6 mb-1 animate-spin text-indigo-500" />
+                                        ) : (
+                                            <ImageIcon className="h-6 w-6 mb-1" />
+                                        )}
+                                        <span className="text-xs">{uploadingDocs.passport ? 'Uploading...' : 'Upload'}</span>
+                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'passport')} disabled={uploadingDocs.passport} />
                                     </label>
                                 )}
                             </div>
@@ -238,7 +269,7 @@ export const Register: React.FC = () => {
                             {/* Business Doc */}
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Business Doc (Opt)</label>
-                                {documents.businessUrl ? (
+                                {documents.businessUrl && !uploadingDocs.business ? (
                                     <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
                                         <img src={documents.businessUrl} alt="Business Doc" className="h-full w-full object-cover" />
                                         <button 
@@ -250,10 +281,14 @@ export const Register: React.FC = () => {
                                         </button>
                                     </div>
                                 ) : (
-                                    <label className="flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors">
-                                        <ImageIcon className="h-6 w-6 mb-1" />
-                                        <span className="text-xs">Upload</span>
-                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'business')} />
+                                    <label className={`flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors ${uploadingDocs.business ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                        {uploadingDocs.business ? (
+                                            <Loader className="h-6 w-6 mb-1 animate-spin text-indigo-500" />
+                                        ) : (
+                                            <ImageIcon className="h-6 w-6 mb-1" />
+                                        )}
+                                        <span className="text-xs">{uploadingDocs.business ? 'Uploading...' : 'Upload'}</span>
+                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'business')} disabled={uploadingDocs.business} />
                                     </label>
                                 )}
                             </div>
