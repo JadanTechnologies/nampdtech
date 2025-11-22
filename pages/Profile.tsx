@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
-import { Save, User, Image as ImageIcon, X, Upload } from 'lucide-react';
+import { Save, User, Image as ImageIcon, X, Upload, Trash2 } from 'lucide-react';
 
 export const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -39,36 +39,63 @@ export const Profile: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleRemoveDocument = (type: 'passport' | 'business' | 'nin') => {
+    if (type === 'passport') setDocuments(prev => ({ ...prev, passportUrl: '' }));
+    if (type === 'business') setDocuments(prev => ({ ...prev, businessUrl: '' }));
+    if (type === 'nin') setDocuments(prev => ({ ...prev, ninUrl: '' }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfile({
-        ...formData,
-        documents: documents
+      ...formData,
+      documents: {
+        ...user.documents,
+        ...documents
+      }
     });
     setIsEditing(false);
-    alert('Profile Updated!');
   };
 
   const DocumentCard = ({ title, url, type }: { title: string, url: string, type: 'passport' | 'nin' | 'business' }) => (
-      <div className="border border-gray-200 rounded-lg p-3 flex flex-col items-center justify-center bg-gray-50">
+      <div className="border border-gray-200 rounded-lg p-3 flex flex-col items-center justify-center bg-gray-50 relative">
           <span className="text-xs font-medium text-gray-500 mb-2">{title}</span>
           {url ? (
               <div className="relative w-full aspect-video bg-gray-200 rounded overflow-hidden group">
                   <img src={url} alt={title} className="w-full h-full object-cover" />
                   {isEditing && (
                     <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                         <label className="cursor-pointer text-white text-xs flex flex-col items-center">
-                            <Upload size={20} />
-                            <span>Change</span>
-                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, type)} />
-                         </label>
+                         <div className="flex space-x-2">
+                            <label className="cursor-pointer text-white text-xs flex flex-col items-center hover:text-indigo-200">
+                                <Upload size={20} />
+                                <span className="mt-1">Change</span>
+                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, type)} />
+                            </label>
+                            <button 
+                                type="button" 
+                                onClick={() => handleRemoveDocument(type)}
+                                className="text-white text-xs flex flex-col items-center hover:text-red-300"
+                            >
+                                <Trash2 size={20} />
+                                <span className="mt-1">Remove</span>
+                            </button>
+                         </div>
                     </div>
+                  )}
+                  {isEditing && (
+                      <button 
+                          type="button" 
+                          onClick={() => handleRemoveDocument(type)}
+                          className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full shadow-md sm:hidden"
+                      >
+                          <X size={12} />
+                      </button>
                   )}
               </div>
           ) : (
               <div className="w-full aspect-video bg-gray-200 rounded flex items-center justify-center border-2 border-dashed border-gray-300">
                    {isEditing ? (
-                       <label className="cursor-pointer flex flex-col items-center text-gray-500 hover:text-indigo-600">
+                       <label className="cursor-pointer flex flex-col items-center text-gray-500 hover:text-indigo-600 w-full h-full justify-center">
                            <Upload size={24} />
                            <span className="text-xs mt-1">Upload</span>
                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, type)} />

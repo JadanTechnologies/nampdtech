@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { MOCK_STATES } from '../services/mockData';
-import { Upload, ScanLine, Loader, ArrowRight, ArrowLeft, Check, AlertCircle, Image as ImageIcon, X } from 'lucide-react';
+import { Upload, ScanLine, Loader, ArrowRight, ArrowLeft, Check, AlertCircle, Image as ImageIcon, X, Trash2 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
 export const Register: React.FC = () => {
@@ -169,8 +169,8 @@ export const Register: React.FC = () => {
                         <h3 className="text-sm font-medium text-gray-900">Identity Documents</h3>
                         
                         {/* NIN Upload & Scan */}
-                        <div className={`bg-indigo-50 border border-indigo-100 rounded-lg p-4 ${documents.ninUrl ? 'bg-green-50 border-green-100' : ''}`}>
-                          <div className="flex items-start justify-between">
+                        <div className={`bg-indigo-50 border border-indigo-100 rounded-lg p-4 transition-colors duration-200 ${documents.ninUrl ? 'bg-green-50 border-green-200' : ''}`}>
+                          <div className="flex items-start justify-between mb-3">
                               <div className="flex items-center">
                                 <div className="flex-shrink-0">
                                     {isScanning ? <Loader className="h-6 w-6 text-indigo-600 animate-spin" /> : <ScanLine className="h-6 w-6 text-indigo-600" />}
@@ -180,60 +180,83 @@ export const Register: React.FC = () => {
                                     {scanError ? (
                                         <p className="text-xs text-red-600 flex items-center mt-1"><AlertCircle className="w-3 h-3 mr-1"/> {scanError}</p>
                                     ) : (
-                                        <p className="text-xs text-indigo-600 mt-1">Upload to auto-fill details</p>
+                                        <p className="text-xs text-indigo-600 mt-1">Upload for Auto-fill</p>
                                     )}
                                 </div>
                               </div>
-                              {documents.ninUrl && (
-                                <button type="button" onClick={() => removeDocument('nin')} className="text-gray-400 hover:text-red-500"><X size={16} /></button>
-                              )}
                           </div>
                           
                           {documents.ninUrl ? (
-                             <div className="mt-2 relative h-32 w-full bg-gray-200 rounded overflow-hidden">
+                             <div className="relative w-full h-32 bg-gray-200 rounded-lg overflow-hidden border border-gray-300 group">
                                 <img src={documents.ninUrl} alt="NIN Preview" className="h-full w-full object-cover" />
+                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity flex items-center justify-center">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => removeDocument('nin')} 
+                                        className="bg-red-600 text-white p-2 rounded-full shadow-lg transform scale-0 group-hover:scale-100 transition-transform"
+                                        title="Remove NIN"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                              </div>
                           ) : (
                              <div className="mt-2">
-                                <label className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
-                                    <Upload className="h-4 w-4 mr-2" />
-                                    {isScanning ? "Analyzing..." : "Upload NIN Slip"}
+                                <label className="w-full flex justify-center items-center px-4 py-4 border-2 border-dashed border-indigo-300 rounded-lg text-sm font-medium text-indigo-600 bg-white hover:bg-indigo-50 cursor-pointer transition-colors">
+                                    <Upload className="h-5 w-5 mr-2" />
+                                    {isScanning ? "Analyzing..." : "Click to Upload NIN"}
                                     <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'nin')} disabled={isScanning} />
                                 </label>
                              </div>
                           )}
                         </div>
 
-                        {/* Passport Photo */}
-                        <div>
-                             <label className="block text-xs font-medium text-gray-700 mb-1">Passport Photograph</label>
-                             {documents.passportUrl ? (
-                                <div className="relative h-24 w-24">
-                                    <img src={documents.passportUrl} alt="Passport" className="h-full w-full object-cover rounded-md border" />
-                                    <button type="button" onClick={() => removeDocument('passport')} className="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-1 shadow"><X size={12} /></button>
-                                </div>
-                             ) : (
-                                <label className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
-                                    <ImageIcon className="h-4 w-4 mr-2" /> Upload Photo
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'passport')} />
-                                </label>
-                             )}
-                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Passport Photo */}
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Passport Photo</label>
+                                {documents.passportUrl ? (
+                                    <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                                        <img src={documents.passportUrl} alt="Passport" className="h-full w-full object-cover" />
+                                        <button 
+                                            type="button" 
+                                            onClick={() => removeDocument('passport')} 
+                                            className="absolute top-1 right-1 bg-red-100 text-red-600 p-1.5 rounded-full hover:bg-red-600 hover:text-white transition-colors shadow-sm opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <label className="flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors">
+                                        <ImageIcon className="h-6 w-6 mb-1" />
+                                        <span className="text-xs">Upload</span>
+                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'passport')} />
+                                    </label>
+                                )}
+                            </div>
 
-                        {/* Business Doc */}
-                        <div>
-                             <label className="block text-xs font-medium text-gray-700 mb-1">Business Document (Optional)</label>
-                             {documents.businessUrl ? (
-                                <div className="relative h-24 w-full max-w-[12rem]">
-                                    <img src={documents.businessUrl} alt="Business Doc" className="h-full w-full object-cover rounded-md border" />
-                                    <button type="button" onClick={() => removeDocument('business')} className="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-1 shadow"><X size={12} /></button>
-                                </div>
-                             ) : (
-                                <label className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
-                                    <ImageIcon className="h-4 w-4 mr-2" /> Upload Document
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'business')} />
-                                </label>
-                             )}
+                            {/* Business Doc */}
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Business Doc (Opt)</label>
+                                {documents.businessUrl ? (
+                                    <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200 group">
+                                        <img src={documents.businessUrl} alt="Business Doc" className="h-full w-full object-cover" />
+                                        <button 
+                                            type="button" 
+                                            onClick={() => removeDocument('business')} 
+                                            className="absolute top-1 right-1 bg-red-100 text-red-600 p-1.5 rounded-full hover:bg-red-600 hover:text-white transition-colors shadow-sm opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <label className="flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors">
+                                        <ImageIcon className="h-6 w-6 mb-1" />
+                                        <span className="text-xs">Upload</span>
+                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'business')} />
+                                    </label>
+                                )}
+                            </div>
                         </div>
                     </div>
                     
