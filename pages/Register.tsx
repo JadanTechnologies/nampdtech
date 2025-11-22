@@ -18,6 +18,13 @@ export const Register: React.FC = () => {
     passport: false,
     business: false
   });
+
+  // Track progress percentage
+  const [uploadProgress, setUploadProgress] = useState({
+    nin: 0,
+    passport: 0,
+    business: 0
+  });
   
   const [formData, setFormData] = useState({
     email: '',
@@ -51,16 +58,24 @@ export const Register: React.FC = () => {
     });
   };
 
+  const simulateProgress = async (type: 'passport' | 'business' | 'nin') => {
+    setUploadProgress(prev => ({ ...prev, [type]: 0 }));
+    for (let i = 0; i <= 100; i += 20) {
+      setUploadProgress(prev => ({ ...prev, [type]: i }));
+      await new Promise(resolve => setTimeout(resolve, 250));
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'passport' | 'business' | 'nin') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Set loading state for this specific document
     setUploadingDocs(prev => ({ ...prev, [type]: true }));
-
+    
     try {
-      // Simulate a small network delay for better UX visual feedback
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Simulate progress for better UX
+      await simulateProgress(type);
 
       const base64 = await convertToBase64(file);
       if (type === 'passport') setDocuments(prev => ({ ...prev, passportUrl: base64 }));
@@ -75,6 +90,7 @@ export const Register: React.FC = () => {
     } finally {
       // Clear loading state
       setUploadingDocs(prev => ({ ...prev, [type]: false }));
+      setUploadProgress(prev => ({ ...prev, [type]: 0 }));
     }
   };
 
@@ -197,13 +213,22 @@ export const Register: React.FC = () => {
                                         <p className="text-xs text-red-600 flex items-center mt-1"><AlertCircle className="w-3 h-3 mr-1"/> {scanError}</p>
                                     ) : (
                                         <div className="flex flex-col w-full">
-                                          <p className="text-xs text-indigo-600 mt-1">
-                                              {uploadingDocs.nin ? "Uploading document..." : isScanning ? "Extracting Data..." : "Upload for Auto-fill"}
+                                          <p className="text-xs text-indigo-600 mt-1 flex justify-between">
+                                              <span>{uploadingDocs.nin ? "Uploading document..." : isScanning ? "Extracting Data with AI..." : "Upload for Auto-fill"}</span>
+                                              {(uploadingDocs.nin) && <span>{uploadProgress.nin}%</span>}
                                           </p>
-                                          {(uploadingDocs.nin || isScanning) && (
+                                          {(uploadingDocs.nin) && (
                                             <div className="w-full bg-indigo-200 rounded-full h-1.5 mt-2 overflow-hidden">
-                                              <div className="bg-indigo-600 h-1.5 rounded-full animate-pulse w-full origin-left scale-x-0 transition-transform duration-[2s] ease-in-out" style={{transform: 'scaleX(0.8)'}}></div>
+                                              <div 
+                                                className="bg-indigo-600 h-1.5 rounded-full transition-all duration-300 ease-out" 
+                                                style={{width: `${uploadProgress.nin}%`}}
+                                              ></div>
                                             </div>
+                                          )}
+                                          {isScanning && (
+                                              <div className="w-full bg-indigo-200 rounded-full h-1.5 mt-2 overflow-hidden">
+                                                  <div className="bg-indigo-600 h-1.5 rounded-full animate-pulse w-full"></div>
+                                              </div>
                                           )}
                                         </div>
                                     )}
@@ -228,10 +253,15 @@ export const Register: React.FC = () => {
                           ) : (
                              <div className="mt-2">
                                 <label className={`w-full flex justify-center items-center px-4 py-4 border-2 border-dashed border-indigo-300 rounded-lg text-sm font-medium text-indigo-600 bg-white hover:bg-indigo-50 cursor-pointer transition-colors ${uploadingDocs.nin || isScanning ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                    {uploadingDocs.nin || isScanning ? (
+                                    {uploadingDocs.nin ? (
                                         <>
                                             <Loader className="h-5 w-5 mr-2 animate-spin" />
-                                            Processing...
+                                            Uploading...
+                                        </>
+                                    ) : isScanning ? (
+                                        <>
+                                            <ScanLine className="h-5 w-5 mr-2 animate-pulse" />
+                                            Scanning...
                                         </>
                                     ) : (
                                         <>
@@ -265,9 +295,10 @@ export const Register: React.FC = () => {
                                         {uploadingDocs.passport ? (
                                             <div className="flex flex-col items-center w-full px-2">
                                               <Loader className="h-6 w-6 mb-1 animate-spin text-indigo-500" />
-                                              <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
-                                                <div className="bg-indigo-500 h-1 rounded-full w-2/3 animate-pulse"></div>
+                                              <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                                <div className="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" style={{width: `${uploadProgress.passport}%`}}></div>
                                               </div>
+                                              <span className="text-[10px] mt-1">{uploadProgress.passport}%</span>
                                             </div>
                                         ) : (
                                             <ImageIcon className="h-6 w-6 mb-1" />
@@ -297,9 +328,10 @@ export const Register: React.FC = () => {
                                         {uploadingDocs.business ? (
                                             <div className="flex flex-col items-center w-full px-2">
                                               <Loader className="h-6 w-6 mb-1 animate-spin text-indigo-500" />
-                                              <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
-                                                <div className="bg-indigo-500 h-1 rounded-full w-2/3 animate-pulse"></div>
+                                              <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                                <div className="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" style={{width: `${uploadProgress.business}%`}}></div>
                                               </div>
+                                              <span className="text-[10px] mt-1">{uploadProgress.business}%</span>
                                             </div>
                                         ) : (
                                             <ImageIcon className="h-6 w-6 mb-1" />
