@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { MOCK_STATES } from '../services/mockData';
-import { Upload, ScanLine, Loader, ArrowRight, ArrowLeft, Check, AlertCircle, Image as ImageIcon, X, Trash2 } from 'lucide-react';
+import { Upload, ScanLine, Loader, ArrowRight, ArrowLeft, Check, AlertCircle, Image as ImageIcon, X, Trash2, CheckCircle } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
 export const Register: React.FC = () => {
@@ -60,9 +60,10 @@ export const Register: React.FC = () => {
 
   const simulateProgress = async (type: 'passport' | 'business' | 'nin') => {
     setUploadProgress(prev => ({ ...prev, [type]: 0 }));
-    for (let i = 0; i <= 100; i += 20) {
+    // Simulating a smoother upload process
+    for (let i = 0; i <= 100; i += 10) {
       setUploadProgress(prev => ({ ...prev, [type]: i }));
-      await new Promise(resolve => setTimeout(resolve, 250));
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
   };
 
@@ -205,22 +206,24 @@ export const Register: React.FC = () => {
                           <div className="flex items-start justify-between mb-3">
                               <div className="flex items-center w-full">
                                 <div className="flex-shrink-0">
-                                    {(isScanning || uploadingDocs.nin) ? <Loader className="h-6 w-6 text-indigo-600 animate-spin" /> : <ScanLine className="h-6 w-6 text-indigo-600" />}
+                                    {(isScanning || uploadingDocs.nin) ? <Loader className="h-6 w-6 text-indigo-600 animate-spin" /> : documents.ninUrl ? <CheckCircle className="h-6 w-6 text-green-600" /> : <ScanLine className="h-6 w-6 text-indigo-600" />}
                                 </div>
                                 <div className="ml-3 w-full mr-4">
-                                    <h3 className="text-sm font-medium text-indigo-800">NIN Slip</h3>
+                                    <h3 className={`text-sm font-medium ${documents.ninUrl && !uploadingDocs.nin ? 'text-green-800' : 'text-indigo-800'}`}>
+                                      {documents.ninUrl && !uploadingDocs.nin ? "NIN Uploaded" : "NIN Slip"}
+                                    </h3>
                                     {scanError ? (
                                         <p className="text-xs text-red-600 flex items-center mt-1"><AlertCircle className="w-3 h-3 mr-1"/> {scanError}</p>
                                     ) : (
                                         <div className="flex flex-col w-full">
                                           <p className="text-xs text-indigo-600 mt-1 flex justify-between">
-                                              <span>{uploadingDocs.nin ? "Uploading document..." : isScanning ? "Extracting Data with AI..." : "Upload for Auto-fill"}</span>
+                                              <span>{uploadingDocs.nin ? "Uploading..." : isScanning ? "Extracting Data..." : documents.ninUrl ? "Verified" : "Upload for Auto-fill"}</span>
                                               {(uploadingDocs.nin) && <span>{uploadProgress.nin}%</span>}
                                           </p>
                                           {(uploadingDocs.nin) && (
-                                            <div className="w-full bg-indigo-200 rounded-full h-1.5 mt-2 overflow-hidden">
+                                            <div className="w-full bg-white rounded-full h-1.5 mt-2 overflow-hidden border border-indigo-200">
                                               <div 
-                                                className="bg-indigo-600 h-1.5 rounded-full transition-all duration-300 ease-out" 
+                                                className="bg-indigo-600 h-1.5 rounded-full transition-all duration-150 ease-linear" 
                                                 style={{width: `${uploadProgress.nin}%`}}
                                               ></div>
                                             </div>
@@ -243,7 +246,7 @@ export const Register: React.FC = () => {
                                     <button 
                                         type="button" 
                                         onClick={() => removeDocument('nin')} 
-                                        className="bg-red-600 text-white p-2 rounded-full shadow-lg transform scale-0 group-hover:scale-100 transition-transform"
+                                        className="bg-red-600 text-white p-2 rounded-full shadow-lg transform scale-0 group-hover:scale-100 transition-transform hover:bg-red-700"
                                         title="Remove NIN"
                                     >
                                         <Trash2 size={18} />
@@ -256,7 +259,7 @@ export const Register: React.FC = () => {
                                     {uploadingDocs.nin ? (
                                         <>
                                             <Loader className="h-5 w-5 mr-2 animate-spin" />
-                                            Uploading...
+                                            Processing...
                                         </>
                                     ) : isScanning ? (
                                         <>
@@ -289,21 +292,26 @@ export const Register: React.FC = () => {
                                         >
                                             <X size={14} />
                                         </button>
+                                        <div className="absolute bottom-0 left-0 right-0 bg-green-500 bg-opacity-80 text-white text-[10px] text-center py-0.5">
+                                          Uploaded
+                                        </div>
                                     </div>
                                 ) : (
-                                    <label className={`flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors ${uploadingDocs.passport ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                    <label className={`flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors ${uploadingDocs.passport ? 'bg-gray-50 cursor-not-allowed border-indigo-300' : ''}`}>
                                         {uploadingDocs.passport ? (
                                             <div className="flex flex-col items-center w-full px-2">
-                                              <Loader className="h-6 w-6 mb-1 animate-spin text-indigo-500" />
-                                              <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                                                <div className="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" style={{width: `${uploadProgress.passport}%`}}></div>
+                                              <Loader className="h-6 w-6 mb-2 animate-spin text-indigo-500" />
+                                              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                                <div className="bg-indigo-500 h-1.5 rounded-full transition-all duration-150" style={{width: `${uploadProgress.passport}%`}}></div>
                                               </div>
-                                              <span className="text-[10px] mt-1">{uploadProgress.passport}%</span>
+                                              <span className="text-[10px] mt-1 text-indigo-600 font-medium">{uploadProgress.passport}%</span>
                                             </div>
                                         ) : (
-                                            <ImageIcon className="h-6 w-6 mb-1" />
+                                            <div className="flex flex-col items-center">
+                                              <ImageIcon className="h-6 w-6 mb-1 text-gray-400" />
+                                              <span className="text-xs mt-1">Upload Photo</span>
+                                            </div>
                                         )}
-                                        <span className="text-xs mt-1">{uploadingDocs.passport ? 'Uploading...' : 'Upload'}</span>
                                         <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'passport')} disabled={uploadingDocs.passport} />
                                     </label>
                                 )}
@@ -322,21 +330,26 @@ export const Register: React.FC = () => {
                                         >
                                             <X size={14} />
                                         </button>
+                                        <div className="absolute bottom-0 left-0 right-0 bg-green-500 bg-opacity-80 text-white text-[10px] text-center py-0.5">
+                                          Uploaded
+                                        </div>
                                     </div>
                                 ) : (
-                                    <label className={`flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors ${uploadingDocs.business ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                    <label className={`flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors ${uploadingDocs.business ? 'bg-gray-50 cursor-not-allowed border-indigo-300' : ''}`}>
                                         {uploadingDocs.business ? (
                                             <div className="flex flex-col items-center w-full px-2">
-                                              <Loader className="h-6 w-6 mb-1 animate-spin text-indigo-500" />
-                                              <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                                                <div className="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" style={{width: `${uploadProgress.business}%`}}></div>
+                                              <Loader className="h-6 w-6 mb-2 animate-spin text-indigo-500" />
+                                              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                                <div className="bg-indigo-500 h-1.5 rounded-full transition-all duration-150" style={{width: `${uploadProgress.business}%`}}></div>
                                               </div>
-                                              <span className="text-[10px] mt-1">{uploadProgress.business}%</span>
+                                              <span className="text-[10px] mt-1 text-indigo-600 font-medium">{uploadProgress.business}%</span>
                                             </div>
                                         ) : (
-                                            <ImageIcon className="h-6 w-6 mb-1" />
+                                            <div className="flex flex-col items-center">
+                                              <ImageIcon className="h-6 w-6 mb-1 text-gray-400" />
+                                              <span className="text-xs mt-1">Upload Doc</span>
+                                            </div>
                                         )}
-                                        <span className="text-xs mt-1">{uploadingDocs.business ? 'Uploading...' : 'Upload'}</span>
                                         <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'business')} disabled={uploadingDocs.business} />
                                     </label>
                                 )}
