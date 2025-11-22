@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import * as ReactRouterDOM from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { MOCK_STATES } from '../services/mockData';
 import { Upload } from 'lucide-react';
 
-const { useNavigate } = ReactRouterDOM;
-
 export const Register: React.FC = () => {
   const { register } = useAuth();
-  const navigate = useNavigate();
+  const history = useHistory();
   const [step, setStep] = useState(1);
   
   const [formData, setFormData] = useState({
@@ -32,7 +30,7 @@ export const Register: React.FC = () => {
       setStep(2);
     } else {
       register(formData);
-      navigate('/');
+      history.push('/');
     }
   };
 

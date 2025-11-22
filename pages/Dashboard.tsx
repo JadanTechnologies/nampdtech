@@ -5,13 +5,12 @@ import { UserRole, MembershipStatus } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, CreditCard, Clock, CheckCircle } from 'lucide-react';
 import { StatusBadge } from '../components/StatusBadge';
-import * as ReactRouterDOM from 'react-router-dom';
-
-const { Link } = ReactRouterDOM;
+import { useHistory } from 'react-router-dom';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { getStats, members } = useData();
+  const history = useHistory();
   const stats = getStats();
 
   // Member View
@@ -42,9 +41,9 @@ export const Dashboard: React.FC = () => {
           </div>
           <div className="bg-gray-50 px-5 py-3">
              {user.status === MembershipStatus.PENDING_PAYMENT ? (
-               <Link to="/payments" className="text-sm font-medium text-indigo-700 hover:text-indigo-900">Go to Payments &rarr;</Link>
+               <button onClick={() => history.push('/payments')} className="text-sm font-medium text-indigo-700 hover:text-indigo-900">Go to Payments &rarr;</button>
              ) : user.status === MembershipStatus.ACTIVE ? (
-                <Link to="/digital-id" className="text-sm font-medium text-green-700 hover:text-green-900">View ID Card &rarr;</Link>
+                <button onClick={() => history.push('/digital-id')} className="text-sm font-medium text-green-700 hover:text-green-900">View ID Card &rarr;</button>
              ) : (
                <span className="text-sm text-gray-500">Please wait for admin processing.</span>
              )}
@@ -142,9 +141,9 @@ export const Dashboard: React.FC = () => {
             </ul>
           </div>
           <div className="mt-6">
-            <Link to="/approvals" className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            <button onClick={() => history.push('/approvals')} className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
               View all
-            </Link>
+            </button>
           </div>
         </div>
       </div>

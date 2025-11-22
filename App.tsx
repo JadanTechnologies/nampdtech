@@ -1,5 +1,5 @@
 import React from 'react';
-import * as ReactRouterDOM from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import { Layout } from './components/Layout';
@@ -13,12 +13,10 @@ import { Certificate } from './pages/Certificate';
 import { DigitalID } from './pages/DigitalID';
 import { Profile } from './pages/Profile';
 
-const { BrowserRouter: Router, Routes, Route, Navigate } = ReactRouterDOM;
-
 // Protected Route Wrapper
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  return isAuthenticated ? <>{children}</> : <Redirect to="/login" />;
 };
 
 const App: React.FC = () => {
@@ -26,22 +24,24 @@ const App: React.FC = () => {
     <AuthProvider>
       <DataProvider>
         <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+          <Switch>
+            <Route path="/login"><Login /></Route>
+            <Route path="/register"><Register /></Route>
             
             {/* Protected Routes */}
-            <Route path="/" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
-            <Route path="/approvals" element={<PrivateRoute><Layout><Approvals /></Layout></PrivateRoute>} />
-            <Route path="/payments" element={<PrivateRoute><Layout><Payments /></Layout></PrivateRoute>} />
-            <Route path="/members" element={<PrivateRoute><Layout><Members /></Layout></PrivateRoute>} />
-            <Route path="/certificate" element={<PrivateRoute><Layout><Certificate /></Layout></PrivateRoute>} />
-            <Route path="/digital-id" element={<PrivateRoute><Layout><DigitalID /></Layout></PrivateRoute>} />
-            <Route path="/profile" element={<PrivateRoute><Layout><Profile /></Layout></PrivateRoute>} />
+            <Route path="/approvals"><PrivateRoute><Layout><Approvals /></Layout></PrivateRoute></Route>
+            <Route path="/payments"><PrivateRoute><Layout><Payments /></Layout></PrivateRoute></Route>
+            <Route path="/members"><PrivateRoute><Layout><Members /></Layout></PrivateRoute></Route>
+            <Route path="/certificate"><PrivateRoute><Layout><Certificate /></Layout></PrivateRoute></Route>
+            <Route path="/digital-id"><PrivateRoute><Layout><DigitalID /></Layout></PrivateRoute></Route>
+            <Route path="/profile"><PrivateRoute><Layout><Profile /></Layout></PrivateRoute></Route>
+            
+            {/* Dashboard must be exact or last to avoid catching everything */}
+            <Route path="/" exact><PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute></Route>
             
             {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
+            <Route path="*"><Redirect to="/" /></Route>
+          </Switch>
         </Router>
       </DataProvider>
     </AuthProvider>

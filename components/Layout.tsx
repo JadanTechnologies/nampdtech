@@ -1,5 +1,5 @@
 import React from 'react';
-import * as ReactRouterDOM from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types';
 import { 
@@ -15,11 +15,9 @@ import {
   X
 } from 'lucide-react';
 
-const { Link, useNavigate, useLocation } = ReactRouterDOM;
-
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const history = useHistory();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -28,14 +26,16 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const isActive = (path: string) => location.pathname === path ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white';
 
   const NavItem = ({ to, icon: Icon, label }: any) => (
-    <Link 
-      to={to} 
-      onClick={() => setMobileOpen(false)}
-      className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${isActive(to)}`}
+    <div 
+      onClick={() => {
+        history.push(to);
+        setMobileOpen(false);
+      }}
+      className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md cursor-pointer ${isActive(to)}`}
     >
       <Icon className="mr-3 h-6 w-6 flex-shrink-0" />
       {label}
-    </Link>
+    </div>
   );
 
   return (
@@ -83,7 +83,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               <p className="text-sm font-medium text-white truncate">{user.fullName}</p>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{user.role.replace('_', ' ')}</p>
               <button 
-                onClick={() => { logout(); navigate('/login'); }}
+                onClick={() => { logout(); history.push('/login'); }}
                 className="mt-3 flex items-center text-xs text-red-400 hover:text-red-300 w-full transition-colors duration-150"
               >
                 <LogOut className="w-3 h-3 mr-1" /> Sign out

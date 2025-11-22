@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { UserRole } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
-import { Search, Filter } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 export const Members: React.FC = () => {
   const { user } = useAuth();
