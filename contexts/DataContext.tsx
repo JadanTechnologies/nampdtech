@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MemberProfile, Payment, MembershipStatus, UserRole } from '../types';
 import { MOCK_USERS, MOCK_PAYMENTS } from '../services/mockData';
@@ -94,15 +93,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           updated.nampdId = `NAM-${stateCode}-${randomNum}`;
         }
 
-        // Update local user in AuthContext (via localStorage hack for demo)
+        // Update local user in AuthContext
         localStorage.setItem('nampd_user', JSON.stringify(updated));
+        // Notify AuthContext
+        window.dispatchEvent(new Event('user-updated'));
         return updated;
       }
       return m;
     }));
-    
-    // Force reload to reflect user changes in AuthContext immediately (simple solution for demo)
-    window.dispatchEvent(new Event('storage'));
   };
 
   const updateProfile = (data: Partial<MemberProfile>) => {
@@ -113,11 +111,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (m.id === currentUser.id) {
         const updated = { ...m, ...data };
         localStorage.setItem('nampd_user', JSON.stringify(updated));
+        window.dispatchEvent(new Event('user-updated'));
         return updated;
       }
       return m;
     }));
-    window.dispatchEvent(new Event('storage'));
   };
 
   const getStats = () => {

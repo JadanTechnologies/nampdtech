@@ -15,11 +15,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<MemberProfile | null>(null);
 
-  useEffect(() => {
+  const loadUser = () => {
     const storedUser = localStorage.getItem('nampd_user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+  };
+
+  useEffect(() => {
+    loadUser();
+    
+    // Listen for updates from DataContext
+    const handleUserUpdate = () => loadUser();
+    window.addEventListener('user-updated', handleUserUpdate);
+    
+    return () => {
+      window.removeEventListener('user-updated', handleUserUpdate);
+    };
   }, []);
 
   const login = (email: string, role: string) => {
