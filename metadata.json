@@ -1,0 +1,5 @@
+{
+  "name": "NAMPDTech Portal",
+  "description": "National Mobile Phone & Accessories Dealers & Technicians Membership Portal. Features role-based access, membership registration, ID verification, payments, and certificate generation.",
+  "requestFramePermissions": []
+}
