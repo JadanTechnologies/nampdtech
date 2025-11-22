@@ -60,7 +60,7 @@ export const Register: React.FC = () => {
 
     try {
       // Simulate a small network delay for better UX visual feedback
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       const base64 = await convertToBase64(file);
       if (type === 'passport') setDocuments(prev => ({ ...prev, passportUrl: base64 }));
@@ -185,20 +185,27 @@ export const Register: React.FC = () => {
                         <h3 className="text-sm font-medium text-gray-900">Identity Documents</h3>
                         
                         {/* NIN Upload & Scan */}
-                        <div className={`bg-indigo-50 border border-indigo-100 rounded-lg p-4 transition-colors duration-200 ${documents.ninUrl ? 'bg-green-50 border-green-200' : ''}`}>
+                        <div className={`bg-indigo-50 border border-indigo-100 rounded-lg p-4 transition-colors duration-200 ${documents.ninUrl && !uploadingDocs.nin ? 'bg-green-50 border-green-200' : ''}`}>
                           <div className="flex items-start justify-between mb-3">
-                              <div className="flex items-center">
+                              <div className="flex items-center w-full">
                                 <div className="flex-shrink-0">
                                     {(isScanning || uploadingDocs.nin) ? <Loader className="h-6 w-6 text-indigo-600 animate-spin" /> : <ScanLine className="h-6 w-6 text-indigo-600" />}
                                 </div>
-                                <div className="ml-3">
+                                <div className="ml-3 w-full mr-4">
                                     <h3 className="text-sm font-medium text-indigo-800">NIN Slip</h3>
                                     {scanError ? (
                                         <p className="text-xs text-red-600 flex items-center mt-1"><AlertCircle className="w-3 h-3 mr-1"/> {scanError}</p>
                                     ) : (
-                                        <p className="text-xs text-indigo-600 mt-1">
-                                            {uploadingDocs.nin ? "Uploading..." : isScanning ? "Extracting Data..." : "Upload for Auto-fill"}
-                                        </p>
+                                        <div className="flex flex-col w-full">
+                                          <p className="text-xs text-indigo-600 mt-1">
+                                              {uploadingDocs.nin ? "Uploading document..." : isScanning ? "Extracting Data..." : "Upload for Auto-fill"}
+                                          </p>
+                                          {(uploadingDocs.nin || isScanning) && (
+                                            <div className="w-full bg-indigo-200 rounded-full h-1.5 mt-2 overflow-hidden">
+                                              <div className="bg-indigo-600 h-1.5 rounded-full animate-pulse w-full origin-left scale-x-0 transition-transform duration-[2s] ease-in-out" style={{transform: 'scaleX(0.8)'}}></div>
+                                            </div>
+                                          )}
+                                        </div>
                                     )}
                                 </div>
                               </div>
@@ -256,11 +263,16 @@ export const Register: React.FC = () => {
                                 ) : (
                                     <label className={`flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors ${uploadingDocs.passport ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                         {uploadingDocs.passport ? (
-                                            <Loader className="h-6 w-6 mb-1 animate-spin text-indigo-500" />
+                                            <div className="flex flex-col items-center w-full px-2">
+                                              <Loader className="h-6 w-6 mb-1 animate-spin text-indigo-500" />
+                                              <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
+                                                <div className="bg-indigo-500 h-1 rounded-full w-2/3 animate-pulse"></div>
+                                              </div>
+                                            </div>
                                         ) : (
                                             <ImageIcon className="h-6 w-6 mb-1" />
                                         )}
-                                        <span className="text-xs">{uploadingDocs.passport ? 'Uploading...' : 'Upload'}</span>
+                                        <span className="text-xs mt-1">{uploadingDocs.passport ? 'Uploading...' : 'Upload'}</span>
                                         <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'passport')} disabled={uploadingDocs.passport} />
                                     </label>
                                 )}
@@ -283,11 +295,16 @@ export const Register: React.FC = () => {
                                 ) : (
                                     <label className={`flex flex-col items-center justify-center aspect-square w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors ${uploadingDocs.business ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                         {uploadingDocs.business ? (
-                                            <Loader className="h-6 w-6 mb-1 animate-spin text-indigo-500" />
+                                            <div className="flex flex-col items-center w-full px-2">
+                                              <Loader className="h-6 w-6 mb-1 animate-spin text-indigo-500" />
+                                              <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
+                                                <div className="bg-indigo-500 h-1 rounded-full w-2/3 animate-pulse"></div>
+                                              </div>
+                                            </div>
                                         ) : (
                                             <ImageIcon className="h-6 w-6 mb-1" />
                                         )}
-                                        <span className="text-xs">{uploadingDocs.business ? 'Uploading...' : 'Upload'}</span>
+                                        <span className="text-xs mt-1">{uploadingDocs.business ? 'Uploading...' : 'Upload'}</span>
                                         <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'business')} disabled={uploadingDocs.business} />
                                     </label>
                                 )}
