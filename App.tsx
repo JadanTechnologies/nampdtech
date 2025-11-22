@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -28,8 +29,12 @@ const App: React.FC = () => {
       <DataProvider>
         <Router>
           <Switch>
-            <Route path="/login" component={Login} />
-            <Route path="/register" component={Register} />
+            <Route path="/login">
+              <Login />
+            </Route>
+            <Route path="/register">
+              <Register />
+            </Route>
             
             {/* Protected Routes */}
             <Route path="/approvals">
